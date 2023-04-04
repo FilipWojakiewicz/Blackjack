@@ -1,32 +1,20 @@
-from Blackjack import Blackjack
-from Deck import Deck
-from Solution import Solution
 from GeneticAlgorithm import GeneticAlgorithm
-
-
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
+from Solution import Solution
 
 if __name__ == '__main__':
-    game = Blackjack()
-    for i in range(2):
-        print(bcolors.WARNING + "################## NEW GAME ##################\n" + bcolors.ENDC)
-        game.play()
+    # Algorithm
+    population_size = 500
+    number_of_games = 50000
+    generations_number = 100
+    ga = GeneticAlgorithm(population_size, number_of_games, generations_number)
+    ga.evolve()
+    best = ga.best_solution()
+    best.save_solution()
 
-    print(f'Player score = {game.player_score}')
+    # s = Solution()
+    # print(s.hard_hands_table.shape[1])
 
-    # solution = Solution()
-    # solution.display_tables()
-
+    ## Deck cards
     # deck = Deck()
     # print(type(deck.cards[0]))
     # for card in deck.cards:

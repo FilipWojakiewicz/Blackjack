@@ -1,7 +1,9 @@
-from random import choice
-
 import numpy as np
 from enum import Enum
+from random import choice
+from IPython.display import display
+
+import pandas as pd
 
 
 class Move(Enum):
@@ -12,12 +14,36 @@ class Move(Enum):
 
 
 class Solution:
-    hard_hands_table = np.zeros((16, 10), dtype=Move)
-    soft_hands_table = np.zeros((8, 10), dtype=Move)
-    pairs_table = np.zeros((10, 10), dtype=Move)
+    hard_hands_table_arr = np.zeros((16, 10), dtype=Move)
+    soft_hands_table_arr = np.zeros((8, 10), dtype=Move)
+    pairs_table_arr = np.zeros((10, 10), dtype=Move)
+
+    hard_hands_table = None
+    soft_hands_table = None
+    pairs_table = None
+    fitness_score = None
 
     def __init__(self):
         self.create_random_solution()
+        self.hard_hands_table = pd.DataFrame(self.hard_hands_table_arr, index=['20', '19', '18', '17', '16', '15', '14', '13', '12', '11', '10', '9', '8', '7', '6', '5'], columns=['2', '3', '4', '5', '6', '7', '8', '9', '10', '11'])
+        self.soft_hands_table = pd.DataFrame(self.soft_hands_table_arr, index=['9', '8', '7', '6', '5', '4', '3', '2'], columns=['2', '3', '4', '5', '6', '7', '8', '9', '10', '11'])
+        self.pairs_table = pd.DataFrame(self.pairs_table_arr, index=['11', '10', '9', '8', '7', '6', '5', '4', '3', '2'], columns=['2', '3', '4', '5', '6', '7', '8', '9', '10', '11'])
+        self.fitness_score = None
+        # print(self.hard_hands_table_arr[1][0])  # row, col
+        # print(self.hard_hands_table['2']['19'])  # col, row
+        # display(self.hard_hands_table)
+        # display(self.soft_hands_table)
+        # display(self.pairs_table)
+
+    def save_solution(self):
+        self.hard_hands_table.to_csv('hard_hand.csv', index=True)
+        self.soft_hands_table.to_csv('soft_hand.csv', index=True)
+        self.pairs_table.to_csv('pairs.csv', index=True)
+
+    def save_solution_path(self, path):
+        self.hard_hands_table.to_csv(path + '/hard_hand.csv', index=True)
+        self.soft_hands_table.to_csv(path + '/soft_hand.csv', index=True)
+        self.pairs_table.to_csv(path + '/pairs.csv', index=True)
 
     def display_tables(self):
         print('      ######## Hard Hands Table ########')
@@ -64,21 +90,21 @@ class Solution:
         print(pairs)
 
     def create_random_solution(self):
-        for x in range(self.hard_hands_table.shape[0]):
-            for y in range(self.hard_hands_table.shape[1]):
+        for x in range(self.hard_hands_table_arr.shape[0]):
+            for y in range(self.hard_hands_table_arr.shape[1]):
                 l = list(Move)
                 l.pop()
                 move = choice(l)
-                self.hard_hands_table[x][y] = move
+                self.hard_hands_table_arr[x][y] = move
 
-        for x in range(self.soft_hands_table.shape[0]):
-            for y in range(self.soft_hands_table.shape[1]):
+        for x in range(self.soft_hands_table_arr.shape[0]):
+            for y in range(self.soft_hands_table_arr.shape[1]):
                 l = list(Move)
                 l.pop()
                 move = choice(l)
-                self.soft_hands_table[x][y] = move
+                self.soft_hands_table_arr[x][y] = move
 
-        for x in range(self.pairs_table.shape[0]):
-            for y in range(self.pairs_table.shape[1]):
+        for x in range(self.pairs_table_arr.shape[0]):
+            for y in range(self.pairs_table_arr.shape[1]):
                 move = choice(list(Move))
-                self.pairs_table[x][y] = move
+                self.pairs_table_arr[x][y] = move

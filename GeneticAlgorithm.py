@@ -1,70 +1,111 @@
-from random import *
+import os
+from random import choices, choice
 
-from Blackjack import Blackjack
+import pandas as pd
+import time
+from Solution import Solution
+from BlackjackBot import BlackjackBot
 
 
 class GeneticAlgorithm:
-    def __init__(self, population_size, chromosome_length, mutation_rate, elite_size, num_games):
+    def __init__(self, population_size, num_games, generations_number):
         self.population_size = population_size
-        self.chromosome_length = chromosome_length
-        self.mutation_rate = mutation_rate
-        self.elite_size = elite_size
         self.num_games = num_games
+        self.generations_number = generations_number
         self.population = []
-
-    def create_individual(self):
-        return [randint(0, 1) for _ in range(self.chromosome_length)]
+        self.next_generation = []
+        self.best = None
+        self.create_population()
 
     def create_population(self):
-        self.population = [self.create_individual() for _ in range(self.population_size)]
+        for i in range(self.population_size):
+            solution = Solution()
+            self.population.append(solution)
 
     def calculate_fitness(self, individual):
-        game = Blackjack()
-        actions = [individual[i:i+2] for i in range(0, len(individual), 2)]
-        total_profit = 0
-        for _ in range(self.num_games):
-            result = game.play(actions)
-            if result == -1:
-                total_profit -= 1
-            elif result == 1:
-                total_profit += 1
-        avg_profit = total_profit / self.num_games
-        return avg_profit
+        bot = BlackjackBot()
+        for i in range(self.num_games):
+            bot.play(individual, False)
+
+        score = bot.player_score
+        individual.fitness_score = score
+        return score
 
     def crossover(self, parent1, parent2):
-        crossover_point = randint(1, self.chromosome_length - 1)
-        child1 = parent1[:crossover_point] + parent2[crossover_point:]
-        child2 = parent2[:crossover_point] + parent1[crossover_point:]
-        return child1, child2
+        new_solution = Solution()
+
+        for row in range(parent1.hard_hands_table.shape[0]):
+            for col in range(parent1.hard_hands_table.shape[1]):
+                r = choice(['parent1', 'parent2'])
+                if r == 'parent1':
+                    new_solution.hard_hands_table_arr[row][col] = parent1.hard_hands_table_arr[row][col]
+                else:
+                    new_solution.hard_hands_table_arr[row][col] = parent2.hard_hands_table_arr[row][col]
+
+        for row in range(parent1.soft_hands_table.shape[0]):
+            for col in range(parent1.soft_hands_table.shape[1]):
+                r = choice(['parent1', 'parent2'])
+                if r == 'parent1':
+                    new_solution.soft_hands_table_arr[row][col] = parent1.soft_hands_table_arr[row][col]
+                else:
+                    new_solution.soft_hands_table_arr[row][col] = parent2.soft_hands_table_arr[row][col]
+
+        for row in range(parent1.pairs_table.shape[0]):
+            for col in range(parent1.pairs_table.shape[1]):
+                r = choice(['parent1', 'parent2'])
+                if r == 'parent1':
+                    new_solution.pairs_table_arr[row][col] = parent1.pairs_table_arr[row][col]
+                else:
+                    new_solution.pairs_table_arr[row][col] = parent2.pairs_table_arr[row][col]
+
+        new_solution.hard_hands_table = pd.DataFrame(new_solution.hard_hands_table_arr,
+                                             index=['20', '19', '18', '17', '16', '15', '14', '13', '12', '11', '10',
+                                                    '9', '8', '7', '6', '5'],
+                                             columns=['2', '3', '4', '5', '6', '7', '8', '9', '10', '11'])
+        new_solution.soft_hands_table = pd.DataFrame(new_solution.soft_hands_table_arr, index=['9', '8', '7', '6', '5', '4', '3', '2'],
+                                             columns=['2', '3', '4', '5', '6', '7', '8', '9', '10', '11'])
+        new_solution.pairs_table = pd.DataFrame(new_solution.pairs_table_arr,
+                                        index=['11', '10', '9', '8', '7', '6', '5', '4', '3', '2'],
+                                        columns=['2', '3', '4', '5', '6', '7', '8', '9', '10', '11'])
+
+        return new_solution
 
     def mutate(self, individual):
-        for i in range(self.chromosome_length):
-            if random() < self.mutation_rate:
-                individual[i] = 1 - individual[i]
+        # Randomowo zmieniać jakieś ruchy na inne z możliwych z pewnym prawdopodobieństwem
+        pass
 
-    def selection(self, fitness_scores):
-        sorted_indices = sorted(range(len(fitness_scores)), key=lambda k: fitness_scores[k], reverse=True)
-        selected_indices = sorted_indices[:self.elite_size]
-        return [self.population[i] for i in selected_indices]
+    def selection(self, n):
+        choices = list()
+        for x in range(n):
+            choices.append(choice(self.population))
+        choices = sorted(choices, key=lambda x: x.fitness_score, reverse=True)
+        return choices[0]
+        # return max(choices, key=lambda x: x.fitness_score)
 
     def evolve(self):
-        fitness_scores = [self.calculate_fitness(individual) for individual in self.population]
-        elite_population = self.selection(fitness_scores)
-        offspring_population = []
-        while len(offspring_population) < self.population_size - self.elite_size:
-            parent1 = choice(elite_population)
-            parent2 = choice(elite_population)
-            child1, child2 = self.crossover(parent1, parent2)
-            self.mutate(child1)
-            self.mutate(child2)
-            offspring_population.append(child1)
-            if len(offspring_population) < self.population_size - self.elite_size:
-                offspring_population.append(child2)
-        self.population = elite_population + offspring_population
+        for i in range(self.generations_number):
+            print(f"Generation : {i+1}")
+            start_time = time.time()
+            for genome in self.population:
+                self.calculate_fitness(genome)
 
-    def get_best(self):
-        fitness_scores = [self.calculate_fitness(individual) for individual in self.population]
-        best_index = fitness_scores.index(max(fitness_scores))
-        best_individual = self.population[best_index]
-        best_fitness = fitness_scores[best_index]
-        return best_individual, best_fitness
+            self.population = sorted(self.population, key=lambda x: x.fitness_score, reverse=True)
+
+            path = f'Data/Generation_{i+1}'
+            os.mkdir(path)
+            self.population[0].save_solution_path(path)
+            self.next_generation = []
+            for x in range(self.population_size):
+                parent1 = self.selection(5)  # Póki co n = 10 ale może potem będzie trzeba zmienić
+                parent2 = self.selection(5)  # Póki co n = 10 ale może potem będzie trzeba zmienić
+                child = self.crossover(parent1, parent2)
+                self.next_generation.append(child)
+
+            print("--- %s seconds ---" % (time.time() - start_time))
+            if i < self.generations_number - 1:
+                self.population = self.next_generation
+
+    def best_solution(self):
+        test = self.population
+        test = sorted(test, key=lambda x: x.fitness_score, reverse=True)
+        return test[0]
