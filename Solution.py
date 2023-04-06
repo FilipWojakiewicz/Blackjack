@@ -14,21 +14,69 @@ class Move(Enum):
 
 
 class Solution:
-    hard_hands_table_arr = np.zeros((16, 10), dtype=Move)
-    soft_hands_table_arr = np.zeros((8, 10), dtype=Move)
-    pairs_table_arr = np.zeros((10, 10), dtype=Move)
+    # hard_hands_table_arr = np.zeros((16, 10), dtype=Move)
+    # soft_hands_table_arr = np.zeros((8, 10), dtype=Move)
+    # pairs_table_arr = np.zeros((10, 10), dtype=Move)
 
-    hard_hands_table = None
-    soft_hands_table = None
-    pairs_table = None
-    fitness_score = None
+    # hard_hands_table = None
+    # soft_hands_table = None
+    # pairs_table = None
+    # fitness_score = None
 
     def __init__(self):
+        self.hard_hands_table_arr = np.zeros((16, 10), dtype=Move)
+        self.soft_hands_table_arr = np.zeros((8, 10), dtype=Move)
+        self.pairs_table_arr = np.zeros((10, 10), dtype=Move)
         self.create_random_solution()
         self.hard_hands_table = pd.DataFrame(self.hard_hands_table_arr, index=['20', '19', '18', '17', '16', '15', '14', '13', '12', '11', '10', '9', '8', '7', '6', '5'], columns=['2', '3', '4', '5', '6', '7', '8', '9', '10', '11'])
         self.soft_hands_table = pd.DataFrame(self.soft_hands_table_arr, index=['9', '8', '7', '6', '5', '4', '3', '2'], columns=['2', '3', '4', '5', '6', '7', '8', '9', '10', '11'])
         self.pairs_table = pd.DataFrame(self.pairs_table_arr, index=['11', '10', '9', '8', '7', '6', '5', '4', '3', '2'], columns=['2', '3', '4', '5', '6', '7', '8', '9', '10', '11'])
         self.fitness_score = None
+        self.hard_optimal_solution = np.array([
+            [Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND],  #1
+            [Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND],  #2
+            [Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND],  #3
+            [Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND],  #4
+            [Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],  #5
+            [Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],   #6
+            [Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],   #7
+            [Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],   #8
+            [Move.HIT, Move.HIT, Move.STAND, Move.STAND, Move.STAND, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],   #9
+            [Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE],  #10
+            [Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.HIT, Move.HIT],  #11
+            [Move.HIT, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],  #12
+            [Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],  #13
+            [Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],  #14
+            [Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],  #15
+            [Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT]   #16
+        ])
+
+        self.soft_optimal_solution = np.array([
+            [Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND],  # 1
+            [Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.DOUBLE, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND],  # 2
+            [Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.STAND, Move.STAND, Move.HIT, Move.HIT, Move.HIT],  # 3
+            [Move.HIT, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],  # 4
+            [Move.HIT, Move.HIT, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],  # 5
+            [Move.HIT, Move.HIT, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],  # 6
+            [Move.HIT, Move.HIT, Move.HIT, Move.DOUBLE, Move.DOUBLE, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],  # 7
+            [Move.HIT, Move.HIT, Move.HIT, Move.DOUBLE, Move.DOUBLE, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT] # 8
+        ])
+
+        self.pairs_optimal_solution = np.array([
+            [Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT],  # 1
+            [Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND, Move.STAND],  # 2
+            [Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.STAND, Move.SPLIT, Move.SPLIT, Move.STAND, Move.STAND],  # 3
+            [Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT],  # 4
+            [Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],  # 5
+            [Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],  # 6
+            [Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.DOUBLE, Move.HIT, Move.HIT],  # 7
+            [Move.HIT, Move.HIT, Move.HIT, Move.SPLIT, Move.SPLIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],  # 8
+            [Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT],  # 9
+            [Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.SPLIT, Move.HIT, Move.HIT, Move.HIT, Move.HIT]  # 10
+        ])
+
+        # print(self.hard_optimal_solution[0][9])  # y, x
+        # print(self.pairs_optimal_solution[6][8])  # y, x
         # print(self.hard_hands_table_arr[1][0])  # row, col
         # print(self.hard_hands_table['2']['19'])  # col, row
         # display(self.hard_hands_table)
@@ -47,7 +95,7 @@ class Solution:
 
     def display_tables(self):
         print('      ######## Hard Hands Table ########')
-        hard_hands = self.hard_hands_table
+        hard_hands = self.hard_hands_table_arr
         for x in range(self.hard_hands_table.shape[0]):
             for y in range(self.hard_hands_table.shape[1]):
                 if hard_hands[x][y] == Move.HIT:
@@ -61,7 +109,7 @@ class Solution:
 
         print(hard_hands)
         print('      ######## Soft Hands Table ########')
-        soft_hands = self.soft_hands_table
+        soft_hands = self.soft_hands_table_arr
         for x in range(self.soft_hands_table.shape[0]):
             for y in range(self.soft_hands_table.shape[1]):
                 if soft_hands[x][y] == Move.HIT:
@@ -75,7 +123,7 @@ class Solution:
 
         print(soft_hands)
         print('      ######## Pairs Table ########')
-        pairs = self.pairs_table
+        pairs = self.pairs_table_arr
         for x in range(self.pairs_table.shape[0]):
             for y in range(self.pairs_table.shape[1]):
                 if pairs[x][y] == Move.HIT:

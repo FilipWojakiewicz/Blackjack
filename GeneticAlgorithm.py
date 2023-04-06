@@ -21,13 +21,38 @@ class GeneticAlgorithm:
         for i in range(self.population_size):
             solution = Solution()
             self.population.append(solution)
+            # solution.display_tables()
+
+        # for t in self.population:
+        #     t.display_tables()
 
     def calculate_fitness(self, individual):
         bot = BlackjackBot()
         for i in range(self.num_games):
-            bot.play(individual, False)
+            bot.play(individual)
 
         score = bot.player_score
+
+        # score = 0
+        #
+        # for row in range(individual.hard_optimal_solution.shape[0]):
+        #     for col in range(individual.hard_optimal_solution.shape[1]):
+        #         if individual.hard_optimal_solution[row][col] == individual.hard_hands_table_arr[row][col]:
+        #             # print("test")
+        #             score += 1
+        #
+        # for row in range(individual.soft_optimal_solution.shape[0]):
+        #     for col in range(individual.soft_optimal_solution.shape[1]):
+        #         if individual.soft_optimal_solution[row][col] == individual.soft_hands_table_arr[row][col]:
+        #             score += 1
+        #
+        # for row in range(individual.pairs_optimal_solution.shape[0]):
+        #     for col in range(individual.pairs_optimal_solution.shape[1]):
+        #         if individual.pairs_optimal_solution[row][col] == individual.pairs_table_arr[row][col]:
+        #             score += 1
+        #
+        # print(score)
+
         individual.fitness_score = score
         return score
 
@@ -70,10 +95,6 @@ class GeneticAlgorithm:
 
         return new_solution
 
-    def mutate(self, individual):
-        # Randomowo zmieniać jakieś ruchy na inne z możliwych z pewnym prawdopodobieństwem
-        pass
-
     def selection(self, n):
         choices = list()
         for x in range(n):
@@ -87,17 +108,19 @@ class GeneticAlgorithm:
             print(f"Generation : {i+1}")
             start_time = time.time()
             for genome in self.population:
+                # genome.display_tables()
                 self.calculate_fitness(genome)
 
             self.population = sorted(self.population, key=lambda x: x.fitness_score, reverse=True)
+
 
             path = f'Data/Generation_{i+1}'
             os.mkdir(path)
             self.population[0].save_solution_path(path)
             self.next_generation = []
             for x in range(self.population_size):
-                parent1 = self.selection(5)  # Póki co n = 10 ale może potem będzie trzeba zmienić
-                parent2 = self.selection(5)  # Póki co n = 10 ale może potem będzie trzeba zmienić
+                parent1 = self.selection(7)  # Póki co n = 7 ale może potem będzie trzeba zmienić
+                parent2 = self.selection(7)  # Póki co n = 7 ale może potem będzie trzeba zmienić
                 child = self.crossover(parent1, parent2)
                 self.next_generation.append(child)
 

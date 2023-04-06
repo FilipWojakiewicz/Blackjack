@@ -12,13 +12,10 @@ class Hand:
         value = 0
         has_ace = False
         for card in self.cards:
-            if card.value > 10:
-                value += 10
-            elif card.value == 1:
+            if card.value == 11:
                 has_ace = True
-                value += 11
-            else:
-                value += card.value
+
+            value += card.value
 
         if has_ace and value > 21:
             value -= 10

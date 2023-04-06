@@ -1,10 +1,9 @@
 from Deck import Deck
 from Hand import Hand
-from enum import Enum
 from Solution import Move
 
 
-class BlackjackBot:
+class BlackjackGame:
     def __init__(self):
         self.deck = Deck()
         self.deck.shuffle()
@@ -12,7 +11,6 @@ class BlackjackBot:
         self.player_split_hand = None
         self.dealer_hand = Hand()
         self.player_score = 100
-        self.solution = None
 
     def deal(self):
         self.player_hand.add_card(self.deck.deal())
@@ -25,104 +23,36 @@ class BlackjackBot:
             if self.player_split_hand.get_value() >= 21:
                 break
 
-            action = self.split_determine_hand()
+            print("Split's hand:", self.player_split_hand)
+            print("Dealer's hand:", self.dealer_hand.cards[0])
+            action = input("Make a move (split): ")
+            print('\n')
 
-            if action == Move.HIT:
+            if action.lower() == "hit":
                 self.player_split_hand.add_card(self.deck.deal())
-            elif action == Move.DOUBLE:
+            elif action.lower() == "double":
                 self.player_split_hand.add_card(self.deck.deal())
                 break
-            elif action == Move.STAND:
+            elif action.lower() == "stand":
                 break
         return True
-
-    def split_determine_hand(self):
-        num_of_cards = len(self.player_split_hand.cards)
-        if num_of_cards == 1:
-            return Move.HIT
-        elif num_of_cards == 2:
-            dealer_card = self.dealer_hand.cards[0]
-            col = str(dealer_card.value)
-            card1 = self.player_split_hand.cards[0]
-            card2 = self.player_split_hand.cards[1]
-            if (card1.value == 11 or card2.value == 11) and card1.value != card2.value:
-                table = self.solution.soft_hands_table
-                if card1.value > card2.value:
-                    row = str(card2.value)
-                else:
-                    row = str(card1.value)
-                action = table[col][row]
-                return action
-            elif card1.value == card2.value:
-                table = self.solution.pairs_table
-                row = str(card1.value)
-                action = table[col][row]
-                return action
-            else:
-                table = self.solution.hard_hands_table
-                value = self.player_split_hand.get_value()
-                row = str(value)
-                action = table[col][row]
-                return action
-        elif num_of_cards >= 3:
-            dealer_card = self.dealer_hand.cards[0]
-            col = str(dealer_card.value)
-            table = self.solution.hard_hands_table
-            value = self.player_split_hand.get_value()
-            row = str(value)
-            action = table[col][row]
-            return action
-
-    def determine_hand(self):
-        num_of_cards = len(self.player_hand.cards)
-        if num_of_cards == 1:
-            return Move.HIT
-        elif num_of_cards == 2:
-            dealer_card = self.dealer_hand.cards[0]
-            col = str(dealer_card.value)
-            card1 = self.player_hand.cards[0]
-            card2 = self.player_hand.cards[1]
-            if (card1.value == 11 or card2.value == 11) and card1.value != card2.value:
-                table = self.solution.soft_hands_table
-                if card1.value > card2.value:
-                    row = str(card2.value)
-                else:
-                    row = str(card1.value)
-                action = table[col][row]
-                return action
-            elif card1.value == card2.value:
-                table = self.solution.pairs_table
-                row = str(card1.value)
-                action = table[col][row]
-                return action
-            else:
-                table = self.solution.hard_hands_table
-                value = self.player_hand.get_value()
-                row = str(value)
-                action = table[col][row]
-                return action
-        elif num_of_cards >= 3:
-            dealer_card = self.dealer_hand.cards[0]
-            col = str(dealer_card.value)
-            table = self.solution.hard_hands_table
-            value = self.player_hand.get_value()
-            row = str(value)
-            action = table[col][row]
-            return action
 
     def player_turn(self):
         while True:
             if self.player_hand.get_value() >= 21:
                 break
 
-            action = self.determine_hand()
+            print("Player's hand:", self.player_hand)
+            print("Dealer's hand:", self.dealer_hand.cards[0])
+            action = input("Make a move: ")
+            print('\n')
 
-            if action == Move.HIT:
+            if action.lower() == "hit":
                 self.player_hand.add_card(self.deck.deal())
-            elif action == Move.DOUBLE:
+            elif action.lower() == "double":
                 self.player_hand.add_card(self.deck.deal())
                 break
-            elif action == Move.SPLIT:
+            elif action.lower() == "split":
                 self.player_split_hand = Hand()
                 split = list()
                 for i in self.player_hand.cards:
@@ -132,7 +62,7 @@ class BlackjackBot:
                         self.player_split_hand.add_card(i)
                         self.split_turn()
                         break
-            elif action == Move.STAND:
+            elif action.lower() == "stand":
                 break
             else:
                 break
@@ -147,28 +77,42 @@ class BlackjackBot:
     def determine_winner(self):
         player_value = self.player_hand.get_value()
         dealer_value = self.dealer_hand.get_value()
+        print("Player's hand:", self.player_hand)
+        print("Dealer's hand:", self.dealer_hand.cards[0])
+        print("\n   ######### Results #########")
+        print(f"            Player {player_value}")
+        print(f"            Dealer {dealer_value}")
 
         if player_value > dealer_value and player_value <= 21:
             self.player_score += 10
+            print("Player wins!")
         elif dealer_value > player_value and dealer_value <= 21:
             self.player_score -= 10
+            print("Dealer wins!")
         elif player_value > 21 and dealer_value <= 21:
             self.player_score -= 10
+            print("Dealer wins!")
         elif player_value < 21 and dealer_value > 21:
             self.player_score += 10
+            print("Player wins!")
 
         if self.player_split_hand is None:
             return
 
         player_split_value = self.player_split_hand.get_value()
+        print(f"            Split {player_split_value}")
         if player_split_value > dealer_value and player_split_value <= 21:
             self.player_score += 10
+            print("Split wins!")
         elif dealer_value > player_split_value and dealer_value <= 21:
             self.player_score -= 10
+            print("Dealer wins!")
         elif player_split_value > 21 and dealer_value <= 21:
             self.player_score -= 10
+            print("Dealer wins!")
         elif player_split_value < 21 and dealer_value > 21:
             self.player_score += 10
+            print("Split wins!")
 
     def is_blackjack(self):
         card1 = self.player_hand.cards[0]
@@ -178,8 +122,7 @@ class BlackjackBot:
         else:
             return False
 
-    def play(self, solution):
-        self.solution = solution
+    def play(self):
         self.deck = Deck()
         self.deck.shuffle()
         self.player_hand = Hand()
@@ -189,6 +132,7 @@ class BlackjackBot:
         self.deal()
         if self.is_blackjack():
             self.player_score += 15
+            print("Blackjack! Player wins!")
             return
 
         self.player_turn()
