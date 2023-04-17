@@ -13,6 +13,6 @@ if __name__ == '__main__':
 
     # GRA
     game = BlackjackGame()
-    game.play()
+    
 
 

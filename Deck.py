@@ -11,7 +11,7 @@ class Deck:
     def build(self):
         suits = ['Hearts ♥', 'Diamonds ♦', 'Clubs ♣', 'Spades ♠']
         ranks = {
-            'Ace': 11,
+            'ace': 11,
             '2': 2,
             '3': 3,
             '4': 4,
@@ -21,9 +21,9 @@ class Deck:
             '8': 8,
             '9': 9,
             '10': 10,
-            'Jack': 10,
-            'Queen': 10,
-            'King': 10
+            'jack': 10,
+            'queen': 10,
+            'king': 10
         }
         for suit in suits:
             for rank, value in ranks.items():

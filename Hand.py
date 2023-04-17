@@ -22,6 +22,9 @@ class Hand:
 
         return value
 
+    def get_cards(self):
+        return self.cards
+
     def __repr__(self):
         return str(self.cards)
     

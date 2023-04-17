@@ -6,10 +6,10 @@ from Solution import Move
 class BlackjackGame:
     def __init__(self):
         self.deck = Deck()
-        self.deck.shuffle()
-        self.player_hand = Hand()
-        self.player_split_hand = None
-        self.dealer_hand = Hand()
+        self.deck.shuffle()   
+        self.player_hand = Hand()   
+        self.player_split_hand = None   
+        self.dealer_hand = Hand()  
         self.player_score = 100
 
     def deal(self):
@@ -134,7 +134,6 @@ class BlackjackGame:
             self.player_score += 15
             print("Blackjack! Player wins!")
             return
-
         self.player_turn()
         self.dealer_turn()
 
