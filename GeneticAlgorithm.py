@@ -26,6 +26,14 @@ class GeneticAlgorithm:
         # for t in self.population:
         #     t.display_tables()
 
+    def results(self, individual):
+        bot = BlackjackBot()
+        for i in range(self.num_games):
+            bot.play(individual)
+
+        print('wins     :', bot.win_count)
+        print('loses    :', bot.lose_count)
+
     def calculate_fitness(self, individual):
         bot = BlackjackBot()
         for i in range(self.num_games):

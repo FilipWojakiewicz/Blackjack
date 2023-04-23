@@ -132,6 +132,7 @@ class BlackjackGame:
         self.deal()
         if self.is_blackjack():
             self.player_score += 15
+            self.win_count += 1
             print("Blackjack! Player wins!")
             return
 
