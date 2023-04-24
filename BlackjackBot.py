@@ -13,6 +13,8 @@ class BlackjackBot:
         self.dealer_hand = Hand()
         self.player_score = 100
         self.solution = None
+        self.won_count = 0
+        self.lose_count = 0
 
     def deal(self):
         self.player_hand.add_card(self.deck.deal())
@@ -26,6 +28,9 @@ class BlackjackBot:
                 break
 
             action = self.split_determine_hand()
+
+            if action == Move.SPLIT:
+                action = Move.STAND
 
             if action == Move.HIT:
                 self.player_split_hand.add_card(self.deck.deal())
@@ -150,12 +155,16 @@ class BlackjackBot:
 
         if player_value > dealer_value and player_value <= 21:
             self.player_score += 10
+            self.won_count += 1
         elif dealer_value > player_value and dealer_value <= 21:
             self.player_score -= 10
+            self.won_count -= 1
         elif player_value > 21 and dealer_value <= 21:
             self.player_score -= 10
+            self.won_count -= 1
         elif player_value < 21 and dealer_value > 21:
             self.player_score += 10
+            self.won_count += 1
 
         if self.player_split_hand is None:
             return
@@ -163,12 +172,16 @@ class BlackjackBot:
         player_split_value = self.player_split_hand.get_value()
         if player_split_value > dealer_value and player_split_value <= 21:
             self.player_score += 10
+            self.won_count += 1
         elif dealer_value > player_split_value and dealer_value <= 21:
             self.player_score -= 10
+            self.won_count -= 1
         elif player_split_value > 21 and dealer_value <= 21:
             self.player_score -= 10
+            self.won_count -= 1
         elif player_split_value < 21 and dealer_value > 21:
             self.player_score += 10
+            self.won_count += 1
 
     def is_blackjack(self):
         card1 = self.player_hand.cards[0]
@@ -189,6 +202,7 @@ class BlackjackBot:
         self.deal()
         if self.is_blackjack():
             self.player_score += 15
+            self.won_count += 1
             return
 
         self.player_turn()
