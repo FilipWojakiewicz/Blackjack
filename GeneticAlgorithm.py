@@ -5,6 +5,8 @@ import pandas as pd
 import time
 from Solution import Solution
 from BlackjackBot import BlackjackBot
+import csv
+import os
 
 
 class GeneticAlgorithm:
@@ -26,13 +28,52 @@ class GeneticAlgorithm:
         # for t in self.population:
         #     t.display_tables()
 
-    def results(self, individual):
+    def save_stats(self, bot, population, generation, i):
+        stats = {
+                'games':    i,
+                'splits':   bot.split_count,
+                'score':    bot.player_score,
+                'wins':     bot.win_count,
+                'loses':    bot.lose_count,
+                'draws':    (i + bot.split_count) - (bot.win_count + bot.lose_count)
+                }
+        
+        dir_name = str(f'Plots/{self.population_size}_{self.num_games}_{self.generations_number}')
+
+        csv_file = f'{dir_name}/{population}_{generation}.csv'
+
+        with open(csv_file, 'a') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(stats.values())
+
+        '''
+        print('--------------------------------')
+        print('games:   ', i)
+        print('splits:  ', bot.split_count)
+        print('score:   ', bot.player_score)
+        print('wins:    ', bot.win_count)
+        print('loses:   ', bot.lose_count)
+        print('draws:   ', (i + bot.split_count) - (bot.win_count + bot.lose_count))
+        '''
+
+    def results(self, individual, population, generation):
         bot = BlackjackBot()
+
+        dir_name = str(f'Plots/stats/{self.population_size}_{self.num_games}_{self.generations_number}')
+        csv_file = f'{dir_name}/{population}_{generation}.csv'
+        if os.path.exists(dir_name) == False:
+            os.mkdir(dir_name)
+
+        with open(csv_file, 'w') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['games', 'splits', 'score', 'wins', 'loses', 'draws'])
+
         for i in range(self.num_games):
             bot.play(individual)
+            if (i + 1) % 50 == 0:
+                self.save_stats(bot, population, generation, i + 1)
 
-        print('wins     :', bot.win_count)
-        print('loses    :', bot.lose_count)
+
 
     def calculate_fitness(self, individual):
         bot = BlackjackBot()
@@ -40,7 +81,7 @@ class GeneticAlgorithm:
             bot.play(individual)
 
         score = bot.player_score
-
+        '''
         # score = 0
         #
         # for row in range(individual.hard_optimal_solution.shape[0]):
@@ -60,7 +101,7 @@ class GeneticAlgorithm:
         #             score += 1
         #
         # print(score)
-
+        '''
         individual.fitness_score = score
         return score
 
@@ -112,23 +153,34 @@ class GeneticAlgorithm:
         # return max(choices, key=lambda x: x.fitness_score)
 
     def evolve(self):
+        selection_value = 4
         for i in range(self.generations_number):
+            score = 0
             print(f"Generation : {i+1}")
             start_time = time.time()
             for genome in self.population:
                 # genome.display_tables()
-                self.calculate_fitness(genome)
+                score += self.calculate_fitness(genome)
 
             self.population = sorted(self.population, key=lambda x: x.fitness_score, reverse=True)
 
 
+            txt_file = f'Plots/score/{self.population_size}_{self.num_games}_{self.generations_number}_{selection_value}.txt'
+            if i == 0:
+                if os.path.exists(txt_file) == True:
+                    os.remove(txt_file)
+            with open(txt_file, 'a') as file:
+                file.write(str(score) + '\n')
+
+            if os.path.exists('Data') == False:
+                os.mkdir('Data')
             path = f'Data/Generation_{i+1}'
             os.mkdir(path)
             self.population[0].save_solution_path(path)
             self.next_generation = []
             for x in range(self.population_size):
-                parent1 = self.selection(7)  # Póki co n = 7 ale może potem będzie trzeba zmienić
-                parent2 = self.selection(7)  # Póki co n = 7 ale może potem będzie trzeba zmienić
+                parent1 = self.selection(selection_value)  # Póki co n = 7 ale może potem będzie trzeba zmienić
+                parent2 = self.selection(selection_value)  # Póki co n = 7 ale może potem będzie trzeba zmienić
                 child = self.crossover(parent1, parent2)
                 self.next_generation.append(child)
 

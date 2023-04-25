@@ -15,6 +15,7 @@ class BlackjackBot:
         self.solution = None
         self.win_count = 0
         self.lose_count = 0
+        self.split_count = 0
 
     def deal(self):
         self.player_hand.add_card(self.deck.deal())
@@ -28,6 +29,9 @@ class BlackjackBot:
                 break
 
             action = self.split_determine_hand()
+
+            if action == Move.SPLIT:
+                action = Move.STAND
 
             if action == Move.HIT:
                 self.player_split_hand.add_card(self.deck.deal())
@@ -125,6 +129,7 @@ class BlackjackBot:
                 self.player_hand.add_card(self.deck.deal())
                 break
             elif action == Move.SPLIT:
+                self.split_count += 1
                 self.player_split_hand = Hand()
                 split = list()
                 for i in self.player_hand.cards:
